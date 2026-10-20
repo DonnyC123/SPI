@@ -1,0 +1,6 @@
+runs/
+build/
+obj_*/
+*.vcd
+*.log
+.claude/settings.local.json
