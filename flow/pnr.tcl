@@ -19,7 +19,7 @@ set_wire_rc -signal -layer met2
 set_wire_rc -clock -layer met5
 
 initialize_floorplan -utilization $::env(FP_CORE_UTIL) -aspect_ratio 1 \
-  -core_space {10.88 10.88 5.52 5.52} -site unithd
+  -core_space 5.52 -site unithd
 # Make the routing tracks from the PDK. Read the layer, X/Y, offset, pitch
 set fh [open $pdk/libs.tech/openlane/sky130_fd_sc_hd/tracks.info]
 foreach {layer dir offset pitch} [read $fh] {
