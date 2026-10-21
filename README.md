@@ -66,9 +66,6 @@ write CTRL   = 0x0000_0201          // cs_sel 2, start
 poll  STATUS until bit 1 (done) is 1
 read  RXDATA                        // byte from the slave
 write STATUS = 0x0000_0002          // clear done
-```
-
-```
 write TXDATA = 0x0000_0000          // dummy byte
 write CTRL   = 0x0000_0203          // cs_sel 2, more, start: cs_n goes low
 poll  STATUS until bit 1 (done) is 1
