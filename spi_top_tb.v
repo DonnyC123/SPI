@@ -90,6 +90,7 @@ module spi_top_tb #(
           .sclk    (sclk),
           .mosi    (mosi),
           .miso    (slave_miso[g]),
+          .resp    (resp_flat[g]),
           .rx_byte (slave_rx_byte[g]),
           .rx_count(slave_rx_count[g])
       );
@@ -103,14 +104,6 @@ module spi_top_tb #(
           rx_log[g][rx_log_len[g]] = slave_rx_byte[g];
         end
         rx_log_len[g] = rx_log_len[g] + 1;
-      end
-
-      integer k;
-
-      always @(resp_flat[g]) begin
-        for (k = 0; k < RESP_DEPTH; k = k + 1) begin
-          u_slave.resp_mem[k] = resp_flat[g][k*DATA_W +: DATA_W];
-        end
       end
     end
   endgenerate

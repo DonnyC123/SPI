@@ -11,26 +11,26 @@ module spi_slave_model #(
   input  wire              mosi,
   output reg               miso,
 
+  input  wire [RESP_DEPTH*DATA_W-1:0] resp,  // Byte k is sent k-th in each transaction
+
   output reg  [DATA_W-1:0] rx_byte,  // Last full byte
   output reg  [31:0]       rx_count
 );
 
   localparam           SAMPLE_RISING = (CPOL == CPHA);  // Modes 0 and 3 sample on rising
 
-  reg     [DATA_W-1:0] resp_mem [0:RESP_DEPTH-1];
   integer              resp_idx;
 
   reg     [DATA_W-1:0] tx_shift;
   reg     [DATA_W-1:0] rx_shift;
   integer              tx_left;
   integer              rx_bits;
-  integer              i;
 
   // Drive the next bit on miso
   task automatic shift_out;
     begin
       if (tx_left == 0) begin
-        tx_shift = resp_mem[resp_idx % RESP_DEPTH];
+        tx_shift = resp[(resp_idx % RESP_DEPTH)*DATA_W +: DATA_W];
         tx_left  = DATA_W;
         resp_idx = resp_idx + 1;
       end
@@ -54,9 +54,6 @@ module spi_slave_model #(
 
 
   initial begin
-    for (i = 0; i < RESP_DEPTH; i = i + 1) begin
-      resp_mem[i] = {DATA_W{1'b0}};
-    end
     miso     = 1'b0;
     rx_byte  = {DATA_W{1'b0}};
     rx_count = 0;
