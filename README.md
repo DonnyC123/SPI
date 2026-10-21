@@ -1,7 +1,7 @@
 # SPI Master
 
 An SPI master with a simple register interface, hardened for SkyWater 130 nm.
-Currently it is built to run at 100 MHz with Yosys, OpenROAD, Magic and Netgen.
+Currently it is built to run at a 100 MHz clock with Yosys, OpenROAD, Magic and Netgen.
 
 ## Parameters
 
@@ -15,7 +15,7 @@ Currently it is built to run at 100 MHz with Yosys, OpenROAD, Magic and Netgen.
 
 | Port | Dir | Width | Description |
 |---|---|---|---|
-| `clk` | in | 1 | System clock |
+| `clk` | in | 1 | system clock |
 | `rst_n` | in | 1 | Asynchronous active-low reset |
 | `bus_wr` | in | 1 | Write strobe, one cycle per write |
 | `bus_addr` | in | 5 | Byte address (bits [4:2] select the register) |
@@ -98,65 +98,3 @@ It prints `ALL TESTS PASSED` or the number of failures.
 make harden1 harden4   # GDS for NUM_DEVICES = 1 and 4
 make synth             # harden both, then run gls and sdf for both
 ```
-
-Each build goes into `runs/devN/`, and the folder is cleared first.
-
-| Step | Script | Tool | Output |
-|---|---|---|---|
-| Synthesis | `flow/synth.tcl` | Yosys | `synth.v` |
-| Place and route | `flow/pnr.tcl` | OpenROAD | `final/nl`, `final/pnl`, `final/def`, `final/odb` |
-| Timing, per corner | `flow/sta.tcl` | OpenROAD | `final/spef`, `final/sdf`, `reports/sta_*.rpt` |
-| GDS | `flow/magic.tcl` | Magic | `final/gds/spi_top.gds` |
-| DRC and extraction | `flow/magic_check.tcl` | Magic | `reports/drc.rpt`, `final/spi_top.layout.spice` |
-| LVS | `flow/lvs.tcl` | Netgen | `reports/lvs.rpt` |
-
-`flow/common.tcl` holds the shared PDK paths and cell lists, and
-`flow/constraints.sdc` holds the timing constraints:
-- 10 ns clock;
-- 4 ns input and output delay;
-- `inv_2` drivers and `inv_16` loads;
-- 5% derate;
-- max transition 0.75 ns, max cap 0.2 pF, max fanout 16.
-
-The build stops with an error on any of:
-- an undriven net in the RTL;
-- negative setup or hold slack at any corner;
-- a DRC error in the GDS;
-- an LVS mismatch.
-
-The antenna count is printed in the summary.
-
-Timing corners: `max_ss_100C_1v60` (worst setup), `nom_tt_025C_1v80`, and
-`min_ff_n40C_1v95` (worst hold).
-
-### Setup
-
-The Makefile is set up for the ece393 tools on moore. It adds `/vol/ece393`
-tool folders to `PATH` and `LD_LIBRARY_PATH` and uses the PDK in
-`/vol/ece393/open_pdks/share/pdk`. Override `PDK_ROOT` to use another PDK,
-and `RUNS` to build somewhere other than `runs/`.
-
-### Results
-
-Built at 100 MHz with 60% core utilization:
-
-| | 1 device | 4 devices |
-|---|---|---|
-| Die | 96.6 × 96.6 µm | 98.7 × 98.7 µm |
-| Setup slack (`max_ss`) | +2.41 ns | +2.25 ns |
-| Hold slack (`min_ff`) | +0.109 ns | +0.111 ns |
-| DRC / antenna / LVS | 0 / 0 / match | 0 / 0 / match |
-
-These numbers are from a 2026 OpenROAD. Other tool versions place and route
-slightly differently.
-
-In the 1-device build one clock tree buffer drives 17 flip-flops against a max
-fanout of 16. It is a clock net and is waived.
-
-### Viewing the layout
-
-```
-klayout -l $PDK_ROOT/sky130A/libs.tech/klayout/tech/sky130A.lyp runs/dev1/final/gds/spi_top.gds
-```
-
-Press `*` in KLayout to show the inside of the standard cells.
