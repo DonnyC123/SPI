@@ -51,7 +51,7 @@ $(HARDEN_T): harden%:
 	rm -rf $(RUNS)/dev$*
 	@mkdir -p $(RUNS)/dev$*
 	export RUN_DIR=$(abspath $(RUNS))/dev$* NUM_DEVICES=$*; \
-	yosys -c flow/synth.tcl > $(RUNS)/dev$*/synth.log && \
+	yosys -c flow/synth.tcl > $(RUNS)/dev$*/synth.log 2>&1 && \
 	openroad -exit flow/pnr.tcl > $(RUNS)/dev$*/pnr.log 2>&1 && \
 	for c in $(SDF_CORNERS); do \
 	  CORNER=$$c openroad -exit flow/sta.tcl > $(RUNS)/dev$*/sta_$$c.log 2>&1 || exit 1; \
