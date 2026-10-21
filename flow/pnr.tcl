@@ -51,9 +51,10 @@ add_pdn_connect -grid stdcell -layers {met4 met5}
 pdngen
 
 # Placement
-global_placement -skip_io -density 0.65
+set density [expr {($::env(FP_CORE_UTIL) + 10) / 100.0}]
+global_placement -skip_io -density $density
 place_pins -hor_layers met3 -ver_layers met2
-global_placement -density 0.65
+global_placement -density $density
 repair_tie_fanout sky130_fd_sc_hd__conb_1/LO
 repair_tie_fanout sky130_fd_sc_hd__conb_1/HI
 estimate_parasitics -placement
