@@ -36,7 +36,7 @@ Currently it is built to run at a 100 MHz clock with Yosys, OpenROAD, Magic and 
 | 0x0C | RXDATA | R | [7:0] byte received by the last transfer |
 | 0x10 | STATUS | R/W1C | [0] busy, [1] done, [2] open |
 
-- **CFG** holds the SPI mode and speed. Writing it does nothing until `cfg_wr` is set in CTRL.
+- **CFG** holds the SPI mode and speed. Writing it does nothing until `cfg_wr` is set in CTRL, and `cfg_wr` only takes effect when no transaction is open or in progress.
   - `cpol` is the idle level of `sclk`.
   - `cpha` = 0 samples on the leading edge, 1 on the trailing edge.
   - `sclk` = `clk / (2 × (sclk_half_div + 1))`. The reset value is `0xFF`, the slowest setting.
@@ -55,7 +55,8 @@ Bits not listed are not stored and read as 0. `cs_sel` values at or above
 
 ## Using it
 
-One byte to device 2 (`NUM_DEVICES` ≥ 3), SPI mode 0, `sclk` = `clk / 16`:
+Reading 2 bytes from device 2 in one transaction. SPI sends and receives at the same time, so each byte read clocks
+out a dummy byte:
 
 ```
 write CFG    = 0x0000_0700          // cpol 0, cpha 0, sclk_half_div 7
@@ -67,8 +68,30 @@ read  RXDATA                        // byte from the slave
 write STATUS = 0x0000_0002          // clear done
 ```
 
-For a multi-byte transaction, set `more` (CTRL bit 1) on every byte except the
-last. `cs_n` stays low between bytes and goes high after the last one.
+```
+write TXDATA = 0x0000_0000          // dummy byte
+write CTRL   = 0x0000_0203          // cs_sel 2, more, start: cs_n goes low
+poll  STATUS until bit 1 (done) is 1
+read  RXDATA                        // first byte (MSB of a 16-bit value)
+
+write TXDATA = 0x0000_0000          // dummy byte
+write CTRL   = 0x0000_0001          // start, more = 0: cs_n goes high after this byte
+poll  STATUS until bit 1 (done) is 1
+read  RXDATA                        // second byte (LSB)
+write STATUS = 0x0000_0002          // clear done
+
+value = (first << 8) | second
+```
+
+- `cs_n` stays low between the two bytes because `more` was set on the first.
+- The second start clears `done`, so no W1C is needed between bytes.
+- `cs_sel` is taken from the first byte only, so the second CTRL write can
+  leave it 0.
+- Read RXDATA before starting the next byte; it is overwritten when that byte
+  finishes.
+- Many devices need a command byte first (for example a register address).
+  Send it as the first byte with `more` set and ignore its RXDATA, then read
+  the 2 data bytes as above.
 
 ## Simulation
 
@@ -78,23 +101,13 @@ make gls1 gls4    # gate-level sim of the hardened netlist, no delays (Icarus)
 make sdf1 sdf4    # gate-level sim with routed delays at 3 corners (Icarus)
 ```
 
-The testbench runs at 100 MHz. It connects one slave model per chip select,
-in SPI modes 0–3, and checks:
-
-- register reset values and access;
-- one byte and three-byte transactions in each mode;
-- the `done` flag, including clear on start and `done` winning over a W1C;
-- `start` ignored while busy;
-- `cfg_wr` and `cs_sel` ignored while a transaction is open;
-- the clock divider;
-- a read and write in the same cycle;
-- reset in the middle of a transfer.
+The testbench runs at 100 MHz.
 
 It prints `ALL TESTS PASSED` or the number of failures.
 
-## Hardening
+## Create the GDS file
 
 ```
 make harden1 harden4   # GDS for NUM_DEVICES = 1 and 4
-make synth             # harden both, then run gls and sdf for both
+make synth             # GDS for NUM_DEVICES = 1 and 4 then run gate level sim
 ```
