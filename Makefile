@@ -10,7 +10,7 @@ CELLS     := $(SKY130A)/libs.ref/sky130_fd_sc_hd/verilog
 RUNS      ?= runs
 
 export PATH            := $(ECE393)/tools/bin:$(ECE393)/tools/klayout:$(ECE393)/oss-cad-suite/bin:$(PATH)
-export LD_LIBRARY_PATH := $(ECE393)/tools/klayout$(if $(LD_LIBRARY_PATH),:$(LD_LIBRARY_PATH))
+export LD_LIBRARY_PATH := $(ECE393)/tools/lib64:$(ECE393)/tools/klayout$(if $(LD_LIBRARY_PATH),:$(LD_LIBRARY_PATH))
 export PYTHONPATH      := $(ECE393)/tools/klayout/pymod$(if $(PYTHONPATH),:$(PYTHONPATH))
 export PDK_ROOT
 export PDK          := sky130A
