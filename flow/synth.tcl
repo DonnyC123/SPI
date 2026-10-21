@@ -1,6 +1,6 @@
 # yosys -c flow/synth.tcl
 
-source [file dirname [info script]]/common.tcl
+source $::env(FLOW_DIR)/common.tcl
 
 yosys read_liberty -lib $lib_tt
 yosys read_verilog {*}$::env(VERILOG_FILES)

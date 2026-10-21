@@ -1,7 +1,7 @@
 # magic -dnull -noconsole -rcfile <sky130A.magicrc> flow/magic_check.tcl
 # DRC and LVS extraction on the written GDS
 
-source [file dirname [info script]]/common.tcl
+source $::env(FLOW_DIR)/common.tcl
 
 drc off
 crashbackups disable

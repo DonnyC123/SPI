@@ -1,7 +1,7 @@
 # openroad -exit flow/pnr.tcl
 # Floorplan, power grid, placement, clock tree, routing and fill
 
-source [file dirname [info script]]/common.tcl
+source $::env(FLOW_DIR)/common.tcl
 
 read_lef $tlef
 read_lef $cell_lef
@@ -12,7 +12,7 @@ read_liberty -corner tt $lib_tt
 read_liberty -corner ff $sc/lib/sky130_fd_sc_hd__ff_n40C_1v95.lib
 read_verilog $run/synth.v
 link_design $design
-read_sdc [file dirname [info script]]/constraints.sdc
+read_sdc $::env(FLOW_DIR)/constraints.sdc
 set_dont_use $pnr_dont_use
 
 set_wire_rc -signal -layer met2

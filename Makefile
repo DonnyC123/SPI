@@ -16,6 +16,7 @@ export PDK_ROOT
 export PDK          := sky130A
 export VERILOG_FILES = $(RTL)
 export FP_CORE_UTIL := 60
+export FLOW_DIR     := $(CURDIR)/flow
 
 DEVICES     := 1 4
 SDF_CORNERS := max_ss_100C_1v60 nom_tt_025C_1v80 min_ff_n40C_1v95

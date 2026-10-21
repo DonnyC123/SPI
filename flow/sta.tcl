@@ -1,7 +1,7 @@
 # openroad -exit flow/sta.tcl, with CORNER set (e.g. max_ss_100C_1v60)
 # reports timing and writes the SDF
 
-source [file dirname [info script]]/common.tcl
+source $::env(FLOW_DIR)/common.tcl
 
 set corner $::env(CORNER)
 lassign [split $corner _] rc process temp volt
@@ -13,7 +13,7 @@ if {![file exists $rules]} {
 
 read_db $run/final/odb/$design.odb
 read_liberty $lib
-read_sdc [file dirname [info script]]/constraints.sdc
+read_sdc $::env(FLOW_DIR)/constraints.sdc
 set_propagated_clock [all_clocks]
 
 file mkdir $run/final/spef/$corner $run/final/sdf/$corner $run/reports

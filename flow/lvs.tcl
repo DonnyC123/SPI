@@ -1,7 +1,7 @@
 # netgen -batch source flow/lvs.tcl
 # Layout extracted from the GDS vs the powered netlist from OpenROAD
 
-source [file dirname [info script]]/common.tcl
+source $::env(FLOW_DIR)/common.tcl
 
 set layout [readnet spice $run/final/$design.layout.spice]
 set schematic [readnet spice $cell_spice]
