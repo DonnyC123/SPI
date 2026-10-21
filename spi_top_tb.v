@@ -407,7 +407,9 @@ module spi_top_tb #(
     wait_idle;
     bus_write(TXDATA, 32'h0000_0033);
     bus_write(CTRL, 32'h0000_0001);
-    @(posedge dut.done);
+    repeat (2 * DATA_W) begin
+      @(sclk);
+    end
     bus_write(STATUS, 32'h0000_0002);
     wait_idle;
     check_read(STATUS, 32'h0000_0002, "done kept when W1C lands with done");
