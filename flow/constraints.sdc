@@ -3,7 +3,10 @@ create_clock -name clk -period $period [get_ports clk]
 set_clock_transition 0.15 [get_clocks clk]
 set_clock_uncertainty 0.25 [get_clocks clk]
 
-set_input_delay 4 -clock [get_clocks clk] [all_inputs -no_clocks]
+set inputs [all_inputs]
+set clk_index [lsearch $inputs [get_ports clk]]
+set inputs [lreplace $inputs $clk_index $clk_index]
+set_input_delay 4 -clock [get_clocks clk] $inputs
 set_output_delay 4 -clock [get_clocks clk] [all_outputs]
 set_driving_cell -lib_cell sky130_fd_sc_hd__inv_2 -pin Y [all_inputs]
 set_load 0.0334 [all_outputs]
