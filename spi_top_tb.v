@@ -10,7 +10,7 @@ module spi_top_tb #(
   localparam integer RESP_DEPTH      = 16;
   localparam integer T_DEV           = (NUM_DEVICES > 1) ? 1 : 0;
   localparam integer OTHER_DEV       = (T_DEV + 1) % NUM_DEVICES;
-  localparam integer CLK_PERIOD      = 20;
+  localparam integer CLK_PERIOD      = 10;
   localparam integer LOG_DEPTH       = 64;
   localparam integer POLL_LIMIT      = 10000;
 
